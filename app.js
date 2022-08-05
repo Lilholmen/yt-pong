@@ -120,6 +120,27 @@ const ball = new Ball({
   },
 });
 
+aniamte();
+
+function aniamte() {
+  requestAnimationFrame(aniamte);
+
+  context.fillStyle = 'black';
+  context.fillRect(0, 0, CANVAS.width, CANVAS.height);
+  paddleLeft.update();
+  paddleRight.update();
+  ball.update();
+}
+
+function collision(paddle, ball) {
+  return (
+    paddle.position.x + paddle.width >= ball.position.x &&
+    paddle.position.x <= ball.position.x + ball.width &&
+    paddle.position.y + paddle.height >= ball.position.y &&
+    paddle.position.y <= ball.position.y + ball.height
+  );
+}
+
 addEventListener('keydown', (event) => {
   switch (event.key) {
     case 'ArrowUp':
@@ -149,24 +170,3 @@ addEventListener('keyup', (event) => {
       break;
   }
 });
-
-aniamte();
-
-function aniamte() {
-  requestAnimationFrame(aniamte);
-
-  context.fillStyle = 'black';
-  context.fillRect(0, 0, CANVAS.width, CANVAS.height);
-  paddleLeft.update();
-  paddleRight.update();
-  ball.update();
-}
-
-function collision(paddle, ball) {
-  return (
-    paddle.position.x + paddle.width >= ball.position.x &&
-    paddle.position.x <= ball.position.x + ball.width &&
-    paddle.position.y + paddle.height >= ball.position.y &&
-    paddle.position.y <= ball.position.y + ball.height
-  );
-}
