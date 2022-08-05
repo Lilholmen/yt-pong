@@ -1,18 +1,32 @@
-*, ::before, ::after{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+*,
+::before,
+::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-body {
-    width: 100%;
-    min-height: 100vh;
-    background: black;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.wrapper {
+  width: 100%;
+  min-height: 100vh;
+  background: black;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.score {
+  display: flex;
+  justify-content: space-between;
+  width: 140px;
+
+  margin-top: 10px;
+  margin-bottom: 50px;
+  font-family: 'Consolas', monospace;
+  font-size: 75px;
+  color: white;
 }
 
 canvas {
-    border: 1px solid white;
+  border: 1px solid white;
 }
