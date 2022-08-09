@@ -122,11 +122,98 @@ const ball = new Ball({
 
 aniamte();
 
+//-------------------------Touch screen control------------------
+function startup() {
+  CANVAS.addEventListener('touchstart', handleStart);
+  CANVAS.addEventListener('touchend', handleEnd);
+  CANVAS.addEventListener('touchcancel', handleCancel);
+  CANVAS.addEventListener('touchmove', handleMove);
+  console.log('Initialized.');
+}
+
+document.addEventListener('DOMContentLoaded', startup);
+
+const ongoingTouches = [];
+
+function handleStart(event) {
+  event.preventDefault();
+  const touches = event.changedTouches;
+  console.log(touches[0]);
+
+  for (let i = 0; i < touches.length; i++) {
+    //console.log(`touch start: ${i}`);
+    ongoingTouches.push(copyTouch(touches[i]));
+    const color = colorForTouch(touches[i]);
+
+    context.beginPath();
+    context.arc(touches[i].pageX, touches[i].pageY, 4, 0, Math.PI * 2, false);
+
+    context.fillStyle = color;
+    context.fill();
+  }
+}
+
+function handleEnd() {}
+
+function handleCancel() {}
+
+function handleMove(event) {
+  event.preventDefault();
+
+  const touches = event.changedTouches;
+
+  for (let i = 0; i < touches.length; i++) {
+    const color = colorForTouch(touches[i]);
+    const idx = ongoingTouchIndexById(touches[i].identifier);
+
+    if (idx >= 0) {
+      //console.log(`continuing touch: ${idx}`);
+      context.beginPath();
+      context.moveTo(ongoingTouches[idx].pageX, ongoingTouches[idx].pageY);
+      context.lineTo(touches[i].pageX, touches[i].pageY);
+      context.lineWidth = 4;
+      context.strokeStyle = color;
+      context.stroke();
+
+      ongoingTouches.splice(idx, 1, copyTouch(touches[i]));
+    }
+  }
+}
+
+function copyTouch({ identifier, pageX, pageY }) {
+  return { identifier, pageX, pageY };
+}
+
+function colorForTouch(touch) {
+  let r = touch.identifier + (10 % 16);
+  let g = Math.floor(touch.identifier + 10 / 3) % 16;
+  let b = Math.floor(touch.identifier + 10 / 7) % 16;
+  r = r.toString(16);
+  g = g.toString(16);
+  b = b.toString(16);
+  const color = `#${r}${g}${b}`;
+  return color;
+}
+
+function ongoingTouchIndexById(searchId) {
+  for (let i = 0; ongoingTouches.length; i++) {
+    const id = ongoingTouches[i].identifier;
+
+    if (id === searchId) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+//---------------------------------------------------------------
+
 function aniamte() {
   requestAnimationFrame(aniamte);
 
-  context.fillStyle = 'black';
-  context.fillRect(0, 0, CANVAS.width, CANVAS.height);
+  //context.fillStyle = 'red';
+  //context.fillRect(0, 0, CANVAS.width, CANVAS.height);
   paddleLeft.update();
   paddleRight.update();
   ball.update();
@@ -142,30 +229,30 @@ function collision(paddle, ball) {
 }
 
 addEventListener('keydown', (event) => {
-  switch (event.key) {
+  switch (event.code) {
     case 'ArrowUp':
       paddleRight.velocity.y = -1;
       break;
     case 'ArrowDown':
       paddleRight.velocity.y = 1;
       break;
-    case 'w':
+    case 'KeyW':
       paddleLeft.velocity.y = -1;
       break;
-    case 's':
+    case 'KeyS':
       paddleLeft.velocity.y = 1;
       break;
   }
 });
 
 addEventListener('keyup', (event) => {
-  switch (event.key) {
+  switch (event.code) {
     case 'ArrowUp':
     case 'ArrowDown':
       paddleRight.velocity.y = 0;
       break;
-    case 'w':
-    case 's':
+    case 'KeyW':
+    case 'KeyS':
       paddleLeft.velocity.y = 0;
       break;
   }
