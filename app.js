@@ -138,22 +138,45 @@ const ongoingTouches = [];
 function handleStart(event) {
   event.preventDefault();
   const touches = event.changedTouches;
-  console.log(touches[0]);
 
   for (let i = 0; i < touches.length; i++) {
     //console.log(`touch start: ${i}`);
     ongoingTouches.push(copyTouch(touches[i]));
     const color = colorForTouch(touches[i]);
+    let touchCords = getTouchCords(touches[i]);
 
     context.beginPath();
-    context.arc(touches[i].pageX, touches[i].pageY, 4, 0, Math.PI * 2, false);
+    context.arc(touchCords.x, touchCords.y, 4, 0, Math.PI * 2, false);
 
     context.fillStyle = color;
     context.fill();
   }
 }
 
-function handleEnd() {}
+function handleEnd(event) {
+  event.preventDefault();
+
+  const touches = event.changedTouches;
+
+  for (let i = 0; i < touches.length; i++) {
+    const color = colorForTouch(touches[i]);
+    let idx = ongoingTouchIndexById(touches[i].identifier);
+
+    let touchCords = getTouchCords(touches[i]);
+    let ongoingTouchCords = getTouchCords(ongoingTouches[idx]);
+
+    if (idx >= 0) {
+      context.lineWidth = 4;
+      context.fillStyle = color;
+      context.beginPath();
+      context.moveTo(ongoingTouchCords.x, ongoingTouchCords.y);
+      context.lineTo(touchCords.x, touchCords.y);
+      context.fillRect(touchCords.x - 4, touchCords.y - 4, 8, 8);
+
+      ongoingTouches.splice(idx, 1);
+    }
+  }
+}
 
 function handleCancel() {}
 
@@ -169,8 +192,12 @@ function handleMove(event) {
     if (idx >= 0) {
       //console.log(`continuing touch: ${idx}`);
       context.beginPath();
-      context.moveTo(ongoingTouches[idx].pageX, ongoingTouches[idx].pageY);
-      context.lineTo(touches[i].pageX, touches[i].pageY);
+
+      let touchCords = getTouchCords(touches[i]);
+      let ongoingTouchCords = getTouchCords(ongoingTouches[idx]);
+
+      context.moveTo(ongoingTouchCords.x, ongoingTouchCords.y);
+      context.lineTo(touchCords.x, touchCords.y);
       context.lineWidth = 4;
       context.strokeStyle = color;
       context.stroke();
@@ -180,14 +207,25 @@ function handleMove(event) {
   }
 }
 
-function copyTouch({ identifier, pageX, pageY }) {
-  return { identifier, pageX, pageY };
+function getTouchCords(touch) {
+  var rect = CANVAS.getBoundingClientRect(), // abs. size of element
+    scaleX = CANVAS.width / rect.width, // relationship bitmap vs. element for x
+    scaleY = CANVAS.height / rect.height; // relationship bitmap vs. element for y
+
+  return {
+    x: (touch.clientX - rect.left) * scaleX, // scale mouse coordinates after they have
+    y: (touch.clientY - rect.top) * scaleY, // been adjusted to be relative to element
+  };
+}
+
+function copyTouch({ identifier, clientX, clientY }) {
+  return { identifier, clientX, clientY };
 }
 
 function colorForTouch(touch) {
-  let r = touch.identifier + (10 % 16);
-  let g = Math.floor(touch.identifier + 10 / 3) % 16;
-  let b = Math.floor(touch.identifier + 10 / 7) % 16;
+  let r = touch.identifier % 16;
+  let g = Math.floor(touch.identifier / 3) % 16;
+  let b = Math.floor(touch.identifier / 7) % 16;
   r = r.toString(16);
   g = g.toString(16);
   b = b.toString(16);
@@ -228,19 +266,23 @@ function collision(paddle, ball) {
   );
 }
 
+function movePaddle(paddle, direction) {
+  paddle.velocity.y = direction;
+}
+
 addEventListener('keydown', (event) => {
   switch (event.code) {
     case 'ArrowUp':
-      paddleRight.velocity.y = -1;
+      movePaddle(paddleRight, -1);
       break;
     case 'ArrowDown':
-      paddleRight.velocity.y = 1;
+      movePaddle(paddleRight, 1);
       break;
     case 'KeyW':
-      paddleLeft.velocity.y = -1;
+      movePaddle(paddleLeft, -1);
       break;
     case 'KeyS':
-      paddleLeft.velocity.y = 1;
+      movePaddle(paddleLeft, 1);
       break;
   }
 });
@@ -249,11 +291,11 @@ addEventListener('keyup', (event) => {
   switch (event.code) {
     case 'ArrowUp':
     case 'ArrowDown':
-      paddleRight.velocity.y = 0;
+      movePaddle(paddleRight, 0);
       break;
     case 'KeyW':
     case 'KeyS':
-      paddleLeft.velocity.y = 0;
+      movePaddle(paddleLeft, 0);
       break;
   }
 });
