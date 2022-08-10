@@ -135,6 +135,8 @@ document.addEventListener('DOMContentLoaded', startup);
 
 const ongoingTouches = [];
 
+function touchMovement() {}
+
 function handleStart(event) {
   event.preventDefault();
   const touches = event.changedTouches;
@@ -178,7 +180,16 @@ function handleEnd(event) {
   }
 }
 
-function handleCancel() {}
+function handleCancel(event) {
+  if (event.cancelable) event.preventDefault();
+
+  const touches = event.changedTouches;
+
+  for (let i = 0; i < touches.length; i++) {
+    let idx = ongoingTouchIndexById(touches[i].identifier);
+    ongoingTouches.splice(idx, 1);
+  }
+}
 
 function handleMove(event) {
   event.preventDefault();
@@ -223,9 +234,9 @@ function copyTouch({ identifier, clientX, clientY }) {
 }
 
 function colorForTouch(touch) {
-  let r = touch.identifier % 16;
-  let g = Math.floor(touch.identifier / 3) % 16;
-  let b = Math.floor(touch.identifier / 7) % 16;
+  let r = 12 - (touch.identifier % 16);
+  let g = 5 - (Math.floor(touch.identifier / 3) % 16);
+  let b = 5 - (Math.floor(touch.identifier / 7) % 16);
   r = r.toString(16);
   g = g.toString(16);
   b = b.toString(16);
