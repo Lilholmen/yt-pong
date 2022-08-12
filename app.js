@@ -1,20 +1,53 @@
 const CANVAS = document.querySelector('canvas');
 const context = CANVAS.getContext('2d');
 
-CANVAS.width = 700;
-CANVAS.height = 360;
+const screenSize = {
+  w: window.innerWidth,
+  h: window.innerHeight,
+};
+
+class GameField {
+  constructor({ browserW, browserH }) {
+    this.browserW = browserW;
+    this.browserH = browserH;
+    this.width = 800;
+    this.height = 450;
+    this.isLandscape = this.browserW > this.browserH;
+    this.globalScale = 1;
+
+    if (this.isLandscape) {
+      let wScale = browserW / this.width;
+      let hScale = browserH / this.height;
+
+      this.globalScale = wScale > hScale ? hScale : wScale;
+    } else {
+      this.globalScale = browserW / this.width;
+    }
+
+    if (this.globalScale !== 1) {
+      this.width *= this.globalScale;
+      this.height *= this.globalScale;
+    }
+  }
+}
+
+const game = new GameField({ browserW: screenSize.w, browserH: screenSize.h });
+
+CANVAS.width = game.width;
+CANVAS.height = game.height;
 
 class Paddle {
-  constructor({ position }) {
+  constructor({ position, scale = 1 }) {
     this.position = position;
+    this.scale = scale;
     this.velocity = {
       x: 0,
       y: 0,
     };
-    this.width = 10;
-    this.height = 100;
+    this.width = 10 * this.scale;
+    this.height = 100 * this.scale;
 
-    this.speed = 3;
+    this.speed = 5 * this.scale;
   }
 
   draw() {
@@ -35,18 +68,19 @@ class Paddle {
 }
 
 class Ball {
-  constructor({ position }) {
+  constructor({ position, scale = 1 }) {
     this.position = position;
+    this.scale = scale;
     this.direction = {
       x: Math.random() > 0.5 ? 1 : -1,
       y: Math.random() > 0.5 ? 1 : -1,
     };
     this.velocity = {
-      x: this.direction.x,
-      y: this.direction.y,
+      x: this.direction.x * this.scale * 3,
+      y: this.direction.y * this.scale * 3,
     };
-    this.width = 10;
-    this.height = 10;
+    this.width = 10 * this.scale;
+    this.height = 10 * this.scale;
     this.leftSide = true;
   }
 
@@ -104,6 +138,7 @@ const paddleLeft = new Paddle({
     x: 10,
     y: 100,
   },
+  scale: game.globalScale,
 });
 
 const paddleRight = new Paddle({
@@ -111,6 +146,7 @@ const paddleRight = new Paddle({
     x: CANVAS.width - 10 * 2,
     y: 100,
   },
+  scale: game.globalScale,
 });
 
 const ball = new Ball({
@@ -118,6 +154,7 @@ const ball = new Ball({
     x: CANVAS.width / 2,
     y: CANVAS.height / 2,
   },
+  scale: game.globalScale,
 });
 
 aniamte();
