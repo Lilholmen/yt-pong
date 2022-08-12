@@ -128,7 +128,6 @@ function startup() {
   CANVAS.addEventListener('touchend', handleEnd);
   CANVAS.addEventListener('touchcancel', handleCancel);
   CANVAS.addEventListener('touchmove', handleMove);
-  console.log('Initialized.');
 }
 
 document.addEventListener('DOMContentLoaded', startup);

@@ -7,7 +7,6 @@ function startup() {
   CANVAS.addEventListener('touchend', handleEnd);
   CANVAS.addEventListener('touchcancel', handleCancel);
   CANVAS.addEventListener('touchmove', handleMove);
-  console.log('Initialized.');
 }
 
 function handleStart(event) {
@@ -15,7 +14,6 @@ function handleStart(event) {
   const touches = event.changedTouches;
 
   for (let i = 0; i < touches.length; i++) {
-    //console.log(`touch start: ${i}`);
     ongoingTouches.push(copyTouch(touches[i]));
     const color = colorForTouch(touches[i]);
     let touchCords = getTouchCords(touches[i]);
