@@ -1,40 +1,68 @@
 const CANVAS = document.querySelector('canvas');
 const context = CANVAS.getContext('2d');
 
-const screenSize = {
-  w: window.innerWidth,
-  h: window.innerHeight,
-};
+CANVAS.width = 800;
+CANVAS.height = 480;
 
 class GameField {
-  constructor({ browserW, browserH }) {
-    this.browserW = browserW;
-    this.browserH = browserH;
-    this.width = 800;
-    this.height = 450;
-    this.isLandscape = this.browserW > this.browserH;
+  constructor({ w, h }) {
+    this.width = w;
+    this.height = h;
+    this.isLandscape = false;
     this.globalScale = 1;
+    this.isPaused = false;
+
+    this.ballDirection = {
+      x: 1,
+      y: 1,
+    };
+  }
+
+  resize({ width = 800, height = 450 }) {
+    this.isLandscape = width > height;
 
     if (this.isLandscape) {
-      let wScale = browserW / this.width;
-      let hScale = browserH / this.height;
+      let wScale = width / this.width;
+      let hScale = height / this.height;
 
       this.globalScale = wScale > hScale ? hScale : wScale;
     } else {
-      this.globalScale = browserW / this.width;
+      this.globalScale = width / this.width;
     }
 
     if (this.globalScale !== 1) {
       this.width *= this.globalScale;
       this.height *= this.globalScale;
     }
+
+    CANVAS.width = this.width;
+    CANVAS.height = this.height;
+  }
+
+  pause() {
+    this.isPaused = !this.isPaused;
+
+    if (this.isPaused) {
+      this.ballDirection = ball.velocity;
+
+      ball.velocity = {
+        x: 0,
+        y: 0,
+      };
+    } else {
+      ball.velocity = this.ballDirection;
+    }
   }
 }
 
-const game = new GameField({ browserW: screenSize.w, browserH: screenSize.h });
+const game = new GameField({ w: CANVAS.width, h: CANVAS.height });
 
-CANVAS.width = game.width;
-CANVAS.height = game.height;
+const screenSize = {
+  width: window.innerWidth,
+  height: window.innerHeight,
+};
+
+game.resize(screenSize);
 
 class Paddle {
   constructor({ position, scale = 1 }) {
@@ -64,6 +92,13 @@ class Paddle {
     ) {
       this.position.y += this.velocity.y * this.speed;
     }
+  }
+
+  resize(scale) {
+    this.position.x *= scale;
+    this.position.y *= scale;
+    this.width *= scale;
+    this.height *= scale;
   }
 }
 
@@ -122,6 +157,13 @@ class Ball {
     } else {
       this.leftSide = true;
     }
+  }
+
+  resize(scale) {
+    this.position.x *= scale;
+    this.position.y *= scale;
+    this.width *= scale;
+    this.height *= scale;
   }
 }
 
@@ -303,23 +345,30 @@ function movePaddle(paddle, direction) {
 }
 
 addEventListener('keydown', (event) => {
-  switch (event.code) {
-    case 'ArrowUp':
-      movePaddle(paddleRight, -1);
-      break;
-    case 'ArrowDown':
-      movePaddle(paddleRight, 1);
-      break;
-    case 'KeyW':
-      movePaddle(paddleLeft, -1);
-      break;
-    case 'KeyS':
-      movePaddle(paddleLeft, 1);
-      break;
+  if (!game.isPaused) {
+    switch (event.code) {
+      case 'Space':
+        game.pause();
+        break;
+      case 'ArrowUp':
+        movePaddle(paddleRight, -1);
+        break;
+      case 'ArrowDown':
+        movePaddle(paddleRight, 1);
+        break;
+      case 'KeyW':
+        movePaddle(paddleLeft, -1);
+        break;
+      case 'KeyS':
+        movePaddle(paddleLeft, 1);
+        break;
+    }
+  } else if (event.code === 'Space') {
+    game.pause();
   }
 });
 
-addEventListener('keyup', (event) => {
+/* addEventListener('keyup', (event) => {
   switch (event.code) {
     case 'ArrowUp':
     case 'ArrowDown':
@@ -330,4 +379,20 @@ addEventListener('keyup', (event) => {
       movePaddle(paddleLeft, 0);
       break;
   }
+}); */
+
+addEventListener('resize', (event) => {
+  screenSize.width = window.innerWidth;
+  screenSize.height = window.innerHeight;
+
+  game.resize(screenSize);
+
+  CANVAS.width = game.width;
+  CANVAS.height = game.height;
+
+  paddleLeft.resize(game.globalScale);
+
+  paddleRight.resize(game.globalScale);
+
+  ball.resize(game.globalScale);
 });
