@@ -1,16 +1,22 @@
+import Game from './Game.js';
+
 const CANVAS = document.querySelector('canvas');
 const context = CANVAS.getContext('2d');
 
 CANVAS.width = 800;
 CANVAS.height = 480;
 
-class GameField {
+/* class Game {
   constructor({ w, h }) {
     this.width = w;
     this.height = h;
     this.isLandscape = false;
     this.globalScale = 1;
     this.isPaused = false;
+
+    this.paddleLeft =
+    this.paddleRight = 
+    this.ball = 
 
     this.ballDirection = {
       x: 1,
@@ -53,18 +59,19 @@ class GameField {
       ball.velocity = this.ballDirection;
     }
   }
-}
+} */
 
-const game = new GameField({ w: CANVAS.width, h: CANVAS.height });
+const game = new Game({ w: CANVAS.width, h: CANVAS.height });
 
 const screenSize = {
   width: window.innerWidth,
   height: window.innerHeight,
 };
 
-game.resize(screenSize);
+game.resize(screenSize, CANVAS);
+console.log(game);
 
-class Paddle {
+/* class Paddle {
   constructor({ position, scale = 1 }) {
     this.position = position;
     this.scale = scale;
@@ -100,9 +107,9 @@ class Paddle {
     this.width *= scale;
     this.height *= scale;
   }
-}
+} */
 
-class Ball {
+/* class Ball {
   constructor({ position, scale = 1 }) {
     this.position = position;
     this.scale = scale;
@@ -166,7 +173,7 @@ class Ball {
     this.height *= scale;
   }
 }
-
+ */
 const scoreDisplay = {
   left: document.querySelector('.score__left'),
   right: document.querySelector('.score__right'),
@@ -175,7 +182,7 @@ const scoreDisplay = {
 scoreDisplay.left.textContent = 0;
 scoreDisplay.right.textContent = 0;
 
-const paddleLeft = new Paddle({
+/* const paddleLeft = new Paddle({
   position: {
     x: 10,
     y: 100,
@@ -197,7 +204,7 @@ const ball = new Ball({
     y: CANVAS.height / 2,
   },
   scale: game.globalScale,
-});
+}); */
 
 aniamte();
 
@@ -226,15 +233,15 @@ function handleStart(event) {
 
     if (touchXY.x < CANVAS.width / 2 && !activeTouches.leftSide) {
       activeTouches.leftSide = copyTouch(touches[i]);
-      paddleLeft.position.y = paddleStopers(
-        touchXY.y - paddleLeft.height / 2,
-        paddleLeft.height
+      game.paddleLeft.position.y = paddleStopers(
+        touchXY.y - game.paddleLeft.height / 2,
+        game.paddleLeft.height
       );
     } else if (!activeTouches.rightSide) {
       activeTouches.rightSide = copyTouch(touches[i]);
-      paddleRight.position.y = paddleStopers(
-        touchXY.y - paddleRight.height / 2,
-        paddleRight.height
+      game.paddleRight.position.y = paddleStopers(
+        touchXY.y - game.paddleRight.height / 2,
+        game.paddleRight.height
       );
     }
   }
@@ -282,15 +289,15 @@ function handleMove(event) {
 
     if (touchXY.x < CANVAS.width / 2) {
       activeTouches.leftSide = copyTouch(touches[i]);
-      paddleLeft.position.y = paddleStopers(
-        touchXY.y - paddleLeft.height / 2,
-        paddleLeft.height
+      game.paddleLeft.position.y = paddleStopers(
+        touchXY.y - game.paddleLeft.height / 2,
+        game.paddleLeft.height
       );
     } else {
       activeTouches.rightSide = copyTouch(touches[i]);
-      paddleRight.position.y = paddleStopers(
-        touchXY.y - paddleRight.height / 2,
-        paddleRight.height
+      game.paddleRight.position.y = paddleStopers(
+        touchXY.y - game.paddleRight.height / 2,
+        game.paddleRight.height
       );
     }
   }
@@ -326,19 +333,19 @@ function aniamte() {
 
   context.fillStyle = 'black';
   context.fillRect(0, 0, CANVAS.width, CANVAS.height);
-  paddleLeft.update();
-  paddleRight.update();
-  ball.update();
+  game.paddleLeft.update(context);
+  game.paddleRight.update(context);
+  game.ball.update(context);
 }
 
-function collision(paddle, ball) {
+/* function collision(paddle, ball) {
   return (
     paddle.position.x + paddle.width >= ball.position.x &&
     paddle.position.x <= ball.position.x + ball.width &&
     paddle.position.y + paddle.height >= ball.position.y &&
     paddle.position.y <= ball.position.y + ball.height
   );
-}
+} */
 
 function movePaddle(paddle, direction) {
   paddle.velocity.y = direction;
@@ -351,16 +358,16 @@ addEventListener('keydown', (event) => {
         game.pause();
         break;
       case 'ArrowUp':
-        movePaddle(paddleRight, -1);
+        movePaddle(game.paddleRight, -1);
         break;
       case 'ArrowDown':
-        movePaddle(paddleRight, 1);
+        movePaddle(game.paddleRight, 1);
         break;
       case 'KeyW':
-        movePaddle(paddleLeft, -1);
+        movePaddle(game.paddleLeft, -1);
         break;
       case 'KeyS':
-        movePaddle(paddleLeft, 1);
+        movePaddle(game.paddleLeft, 1);
         break;
     }
   } else if (event.code === 'Space') {
@@ -385,14 +392,14 @@ addEventListener('resize', (event) => {
   screenSize.width = window.innerWidth;
   screenSize.height = window.innerHeight;
 
-  game.resize(screenSize);
+  game.resize(screenSize, CANVAS);
 
   CANVAS.width = game.width;
   CANVAS.height = game.height;
 
-  paddleLeft.resize(game.globalScale);
+  game.paddleLeft.resize(game.globalScale);
 
-  paddleRight.resize(game.globalScale);
+  game.paddleRight.resize(game.globalScale);
 
-  ball.resize(game.globalScale);
+  game.ball.resize(game.globalScale);
 });
