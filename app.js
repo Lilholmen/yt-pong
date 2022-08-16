@@ -57,6 +57,8 @@ class Ball extends Board {
   constructor(position, width, height, color) {
     super(position, width, height, color);
 
+    this.speed = 1;
+
     this.direction = {
       x: Math.random() > 0.5 ? 1 : -1,
       y: Math.random() > 0.5 ? 1 : -1,
@@ -94,8 +96,8 @@ class Ball extends Board {
       this.velocity.x *= -1;
     }
 
-    this.position.x += this.velocity.x;
-    this.position.y += this.velocity.y;
+    this.position.x += this.velocity.x * this.speed;
+    this.position.y += this.velocity.y * this.speed;
 
     if (this.position.x > CANVAS.width / 2) {
       this.leftSide = false;
@@ -228,15 +230,15 @@ function handleStart(event) {
 
     if (touchXY.x < CANVAS.width / 2 && !activeTouches.leftSide) {
       activeTouches.leftSide = copyTouch(touches[i]);
-      game.paddleLeft.position.y = paddleStopers(
-        touchXY.y - game.paddleLeft.height / 2,
-        game.paddleLeft.height
+      paddleLeft.position.y = paddleStopers(
+        touchXY.y - paddleLeft.height / 2,
+        paddleLeft.height
       );
     } else if (!activeTouches.rightSide) {
       activeTouches.rightSide = copyTouch(touches[i]);
-      game.paddleRight.position.y = paddleStopers(
-        touchXY.y - game.paddleRight.height / 2,
-        game.paddleRight.height
+      paddleRight.position.y = paddleStopers(
+        touchXY.y - paddleRight.height / 2,
+        paddleRight.height
       );
     }
   }
@@ -284,15 +286,15 @@ function handleMove(event) {
 
     if (touchXY.x < CANVAS.width / 2) {
       activeTouches.leftSide = copyTouch(touches[i]);
-      game.paddleLeft.position.y = paddleStopers(
-        touchXY.y - game.paddleLeft.height / 2,
-        game.paddleLeft.height
+      paddleLeft.position.y = paddleStopers(
+        touchXY.y - paddleLeft.height / 2,
+        paddleLeft.height
       );
     } else {
       activeTouches.rightSide = copyTouch(touches[i]);
-      game.paddleRight.position.y = paddleStopers(
-        touchXY.y - game.paddleRight.height / 2,
-        game.paddleRight.height
+      paddleRight.position.y = paddleStopers(
+        touchXY.y - paddleRight.height / 2,
+        paddleRight.height
       );
     }
   }
